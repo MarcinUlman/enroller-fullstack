@@ -34,7 +34,7 @@
     export default {
         components: {LoginForm, MeetingsPage},
         data() {
-            retun
+            return {
                 authenticatedUsername: "",
                 registering: false,
                 message: '',
@@ -44,7 +44,11 @@
         methods: {
             login(user) {
                 this.clearMessage();
-                this.authenticatedUsername = user.login;
+                                this.$http.post('tokens', user)
+                    .then(() => {
+                        this.authenticatedUsername = user.login;
+                    })
+                    .catch(() => this.failure('Logowanie nieudane.'));
             },
             logout() {
                 this.authenticatedUsername = '';
@@ -70,7 +74,8 @@
                 },
                 cleanMessage() {
                     this.maessage = undefined;
-                },
+                }
+        },
             computed: {
                 loginButtonLabel() {
                     return this.registering ? 'Zarejestruj się' : 'Zaloguj się';
