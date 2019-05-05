@@ -13,16 +13,15 @@
 	</div>
 	<div v-else>
 		<button @click="registering = false"
-			:class="!registering ? '' : 'button-outline'">Logowanie</button>
+			:class="!registering ? '' : 'button-outline'">Zaloguj się</button>
 			
 		<button @click="registering = true"
 			:class="registering ? '' : 'button-outline'">Rejestruj się</button>
-			
-		<login-form v-if="!registering" @login="login($event)"></login-form>
-		
-		<login-form v-else button-label="Zarejestruj się"
-			@login="register($event)"></login-form>
 
+        <div :class="'alert alert-' + (this.isError ? 'error' : 'success')" v-if="message">{{ message }}</div>
+			
+		<login-form @submit="registering ? register($event) : login($event)" :button-label="loginButtonLabe"></login-form>
+		
 	</div>
 </div>
 </template>
@@ -35,29 +34,47 @@
     export default {
         components: {LoginForm, MeetingsPage},
         data() {
-            return {
+            retun
                 authenticatedUsername: "",
-                registering: false
+                registering: false,
+                message: '',
+                isError: false
             };
         },
         methods: {
             login(user) {
+                this.clearMessage();
                 this.authenticatedUsername = user.login;
             },
             logout() {
                 this.authenticatedUsername = '';
             },
             register(user) {
+                 this.clearMessage();
             	 this.$http.post('participants', user)
-            	     .then(response => {
-            	    	 console.log(response);
-            	         alert(response.bodyText);
+            	     .then(() => {
+            	    	this.success('Konto zostało założone. Możesz się zalogować.');
+                        this.registering = false;
             	     })
-            	     .catch(response => {
-            	    	 console.log(response);
-            	    	 alert(response.bodyText);
-            	     });
-            	}
+            	     .catch(response => 
+            	    	 this.failure('Błąd przy zakładaniu konta. Kod odpowiedzi: ' + response.status
+            	     ));
+                },
+                success(message){
+                    this.message = message;
+                    this.isError = false;
+                },
+                failure(message){
+                    this.message = message;
+                    this.isError = true;
+                },
+                cleanMessage() {
+                    this.maessage = undefined;
+                },
+            computed: {
+                loginButtonLabel() {
+                    return this.registering ? 'Zarejestruj się' : 'Zaloguj się';
+            }
         }
     };
 </script>
