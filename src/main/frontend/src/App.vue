@@ -20,7 +20,7 @@
 
         <div :class="'alert alert-' + (this.isError ? 'error' : 'success')" v-if="message">{{ message }}</div>
 			
-		<login-form @submit="registering ? register($event) : login($event)" :button-label="loginButtonLabe"></login-form>
+		<login-form @submit="registering ? register($event) : login($event)" :button-label="loginButtonLabel"></login-form>
 		
 	</div>
 </div>
@@ -30,6 +30,7 @@
     import "milligram";
     import LoginForm from "./LoginForm";
     import MeetingsPage from "./meetings/MeetingsPage";
+    import Vue from "vue";
 
     export default {
         components: {LoginForm, MeetingsPage},
@@ -44,14 +45,23 @@
         methods: {
             login(user) {
                 this.clearMessage();
-                                this.$http.post('tokens', user)
-                    .then(() => {
-                        this.authenticatedUsername = user.login;
+                this.$http.post('tokens', user)
+                    .then(response => {
+                        const token = response.body.token;
+                        this.storeAuth(user.login, token);
                     })
                     .catch(() => this.failure('Logowanie nieudane.'));
             },
+            storeAuth(userName, token) {
+                this.authenticatedUsername = userName;
+                Vue.http.headers.common.Authorization = 'Bearer ' + token;
+                localStorage.setItem('username', username);
+                localStorage.setItem('token', token);
+            },
             logout() {
                 this.authenticatedUsername = '';
+                delete Vue.http.headers.common.Authorization;
+                localStorage.clear();
             },
             register(user) {
                  this.clearMessage();
@@ -75,6 +85,15 @@
                 cleanMessage() {
                     this.maessage = undefined;
                 }
+        },
+            mounted() {
+            const username = localStorage.getItem('username');
+            const token = localStorage.getItem('token');
+            if (username && token) {
+                this.storeAuth(username, token);
+                this.$http.get(`participants/${username}`)
+                    .catch(() => this.logout());
+            }
         },
             computed: {
                 loginButtonLabel() {
