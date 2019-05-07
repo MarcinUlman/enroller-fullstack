@@ -10,3 +10,4 @@ bin
 *.iml
 src/main/resources/public/
 *.db
+.vscode
