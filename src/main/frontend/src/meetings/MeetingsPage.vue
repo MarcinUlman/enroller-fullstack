@@ -31,7 +31,16 @@
         },
         methods: {
             addNewMeeting(meeting) {
+                console.log(meeting);
+                this.$http.post('meetings', meeting)
+                    .then(() => {
+                        console.log("poszlo do bazy");
+                    })
+                    .catch(response => console.log("nie poszlo do bazy" + response.status));
+
+               
                 this.meetings.push(meeting);
+                
             },
             addMeetingParticipant(meeting) {
                 meeting.participants.push(this.username);
