@@ -2,7 +2,7 @@
   <div>
     <new-meeting-form @added="addNewMeeting($event)"></new-meeting-form>
 
-    <span v-if="meetings.length == 0">
+    <span v-if="meetings.length === 0">
                Brak zaplanowanych spotkań.
            </span>
     <h3 v-else>
@@ -30,17 +30,18 @@
             };
         },
         methods: {
-            addNewMeeting(meeting) {
-                console.log(meeting);
-                this.$http.post('meetings', meeting)
-                    .then(() => {
-                        console.log("poszlo do bazy");
+            getMeetings() {
+                this.$http.get('meetings')
+                    .then(response => { 
+                        this.meetings = response.body;
                     })
-                    .catch(response => console.log("nie poszlo do bazy" + response.status));
-
-               
-                this.meetings.push(meeting);
-                
+            },
+            addNewMeeting(meeting) {
+                this.$http.post('meetings', meeting)
+                    .then(response => {
+                        this.meetings.push(response.body);
+                    });
+                this.getMeetings();
             },
             addMeetingParticipant(meeting) {
                 meeting.participants.push(this.username);
@@ -51,6 +52,9 @@
             deleteMeeting(meeting) {
                 this.meetings.splice(this.meetings.indexOf(meeting), 1);
             }
+        },
+        mounted() {
+            this.$nextTick(this.getMeetings());
         }
     }
 </script>
