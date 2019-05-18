@@ -47,10 +47,17 @@
                 meeting.participants.push(this.username);
             },
             removeMeetingParticipant(meeting) {
+                
+
                 meeting.participants.splice(meeting.participants.indexOf(this.username), 1);
             },
             deleteMeeting(meeting) {
+                this.$http.delete('meetings/' + meeting.id.toString())
+                    .then(response =>{
+                        this.meetings.splice(this.meetings.indexOf(meeting), 1);
+                    });
                 this.meetings.splice(this.meetings.indexOf(meeting), 1);
+                this.getMeetings();
             }
         },
         mounted() {
