@@ -44,12 +44,27 @@
                 this.getMeetings();
             },
             addMeetingParticipant(meeting) {
-                meeting.participants.push(this.username);
+                  meeting.participants.push(this.username);
+                this.$http.post('meetings/'+ meeting.id +'/participants', {login:this.username})
+                     .then(response => {
+                         console.log("udało się zapisac");
+                          this.getMeetings();
+                     })
+                     .catch(response => {
+                          console.log("nie udało się zapisac");
+                     });
             },
             removeMeetingParticipant(meeting) {
-                
-
                 meeting.participants.splice(meeting.participants.indexOf(this.username), 1);
+                
+                this.$http.delete('meetings/'+ meeting.id + '/participants/' + this.username)
+                     .then(response => {
+                         console.log("udało się zapisac");
+                          this.getMeetings();
+                     })
+                     .catch(response => {
+                          console.log("nie udało się zapisac");
+                     });
             },
             deleteMeeting(meeting) {
                 this.$http.delete('meetings/' + meeting.id.toString())
